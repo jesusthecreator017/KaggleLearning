@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error
+from sklearn.impute import SimpleImputer
 
 # Load the data
 data_dir: str = ('data/melb_data.csv')
@@ -26,5 +27,28 @@ def score_dataset(X_train, X_val, y_train, y_val):
 # Approach 1: Drop Columns with missing values
 cols_with_missing = [col for col in train_X.columns if train_X[col].isnull().any()]
 
-dropped_train_X = train_X.drop(cols_with_missing)
-dropped_val_X = val_X.drop(cols_with_missing)
+dropped_train_X = train_X.drop(cols_with_missing, axis=1)
+dropped_val_X = val_X.drop(cols_with_missing, axis=1)
+
+print(f"MAE Approach #1 (Drop Columns with Missing Values): {score_dataset(dropped_train_X, dropped_val_X, train_y, val_y)}")
+
+# Approach #2: Imputation
+my_imputer = SimpleImputer()
+imputed_train_X = my_imputer.fit_transform(train_X)
+imputed_val_X = my_imputer.transform(val_X)
+
+print(f"MAE Approach #2 (Impute Into Missing Values): {score_dataset(imputed_train_X, imputed_val_X, train_y, val_y)}")
+
+# Appraoch #3: Extension to Imputing
+X_train_plus = train_X.copy()
+X_val_plus = val_X.copy()
+
+for col in cols_with_missing:
+    X_train_plus[col + "_was_missing"] = X_train_plus[col].isnull()
+    X_val_plus[col + "_was_missing"] = X_val_plus[col].isnull()
+
+my_new_imputer = SimpleImputer()
+imputed_X_train_plus = pd.DataFrame(my_new_imputer.fit_transform(X_train_plus))
+imputed_X_val_plus = pd.DataFrame(my_new_imputer.transform(X_val_plus))
+
+print(f"MAE Approach #3 (An Extension to Imputing): {score_dataset(imputed_X_train_plus, imputed_X_val_plus, train_y, val_y)}")
