@@ -57,3 +57,4 @@ sub = pd.read_csv('data/submission.csv')
 
 print(f"Shape of Submission: {sub.shape}")
 print(f"Last few entries of Submission:\n{sub.loc[1450:]}")
+print("daily commit")
